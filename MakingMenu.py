@@ -56,7 +56,13 @@ def option3():
 def option4():
     cls()
     print("Set BPM (Speed)")
-    input()
+    bpmIn = input()
+    try:
+        bpmIn = int(bpmIn)
+    except ValueError:
+        print("Please input a number")
+    else:
+        bpm = bpmIn
 
 def option5():
     cls()
