@@ -55,14 +55,34 @@ def option3():
 
 def option4():
     cls()
-    print("Set BPM (Speed)")
-    bpmIn = input()
-    try:
-        bpmIn = int(bpmIn)
-    except ValueError:
-        print("Please input a number")
-    else:
-        bpm = bpmIn
+    print("1) Set BPM (Speed)")
+    print("2) Return to main menu")
+    select = input()
+    match select:   
+        case '1':
+            cls()
+            print("Please input bpm")
+            bpmIn = input()
+            try:
+                bpmIn = int(bpmIn) #convert input into int
+                cls()
+                print("BPM set to", bpmIn) # tell user the bpm changed
+                print("Press enter to return to main menu")
+                input()
+            except ValueError:
+                cls()
+                print("Please input a number") # if input isn't number give error
+                print("Press enter to return to main menu")
+                input()
+            else:
+                bpm = bpmIn
+        case '2': 
+                __name__ == "__main__" # return to main menu
+        case _:
+            cls()
+            print("The input value is not valid. Please try again.")
+            option1()
+    
 
 def option5():
     cls()
