@@ -40,6 +40,7 @@ def option1():
         case _:
             cls()
             print("The input value is not valid. Please try again.")
+            input()
             option1()
     
 
@@ -72,8 +73,8 @@ def option4():
             except ValueError:
                 cls()
                 print("Please input a number") # if input isn't number give error
-                print("Press enter to return to main menu")
                 input()
+                option4()
             else:
                 bpm = bpmIn
         case '2': 
@@ -81,7 +82,8 @@ def option4():
         case _:
             cls()
             print("The input value is not valid. Please try again.")
-            option1()
+            input()
+            option4()
     
 
 def option5():
@@ -92,7 +94,35 @@ def option5():
 def option6():
     cls()
     print("Add background noise")
-    input()
+    print("1) White noise")
+    print("2) Pink noise")
+    print("3) Brown noise")
+    print("4) Return to main menu")
+    noise = input()
+    match noise:
+        case '1':
+            cls()
+            print("Added white noise")
+            print("Press enter to return to main menu")
+            input()
+        case '2':
+            cls()
+            print("Added pink noise")
+            print("Press enter to return to main menu")
+            input()
+        case '3':
+            cls()
+            print("Added brown noise")
+            print("Press enter to return to main menu")
+            input()
+        case '4':
+            __name__ == "__main__" # return to main menu
+        case _:
+            cls()
+            print("The input value is not valid. Please try again.")
+            input()
+            option6()
+
 
 def option7():
     cls()
