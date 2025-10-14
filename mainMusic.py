@@ -46,7 +46,7 @@ def option1():
 
 def option2():
     cls()
-    print("Set loudness")
+    print("1) Set loudness")
     input()
 
 def option3():
