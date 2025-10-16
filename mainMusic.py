@@ -3,6 +3,11 @@ from pickle import TRUE
 import sys
 import pydub
 from pydub import AudioSegment
+from music21 import converter
+import os
+
+# pydub documentation - https://www.pydub.com/ and https://github.com/jiaaro/pydub/blob/master/API.markdown
+#
 
 def cls():
     os.system('cls' if os.name=='nt' else 'clear')
@@ -79,10 +84,30 @@ def option2():
                 __name__ == "__main__" # return to main menu
 
 def option3():
+    global output # make abc file a global variable so other functions can access it
     cls()
     print("1) Set ABC file path")
     print("2) Return to main menu")
     choose = input()
+    match choose:
+        case '1':
+            cls()
+            print("Please input file path")
+            filePath = input()
+            if filePath.endswith('.wav'):
+                abc = AudioSegment.from_wav(filePath)
+                output = abc
+            elif filePath.endswith('.wav"'):
+                filePath = filePath.replace('"', "") # remove apostrophes from any imput
+                abc = AudioSegment.from_wav(filePath)
+                output = abc
+            else:
+                print("Not a valid file")
+                input()
+                option3()
+            
+        case '2':
+             __name__ == "__main__" # return to main menu
 
 def option4():
     cls()
@@ -160,13 +185,21 @@ def option7():
     input()
 
 def option8():
+    global output
     cls()
-    print("Play WAV file")
+    print("Play ABC file")
+    output.show('midi')
     input()
 
 def option9():
+    global output
     cls()
-    print("Save as WAV file")
+    output.export(r'output\test.wav', format='wav')
+    print("File saved to output")
+    if not output:
+        print("No file to download!")
+        input() # send back to main menu
+    
     input()
     
 
@@ -188,7 +221,7 @@ if __name__ == "__main__":
         print("5) Change pitch")
         print("6) Add background noise")
         print("7) Mix within external WAV file")
-        print("8) Play WAV file")
+        print("8) Play ABC file")
         print("9) Save as WAV file")
         print("10) Exit")
         inputText = input("Please select a number between 1 and 10: ")
