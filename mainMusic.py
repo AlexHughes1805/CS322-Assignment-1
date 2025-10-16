@@ -1,6 +1,8 @@
 import os
 from pickle import TRUE
 import sys
+import pydub
+from pydub import AudioSegment
 
 def cls():
     os.system('cls' if os.name=='nt' else 'clear')
@@ -39,20 +41,48 @@ def option1():
             __name__ == "__main__" # return to main menu
         case _:
             cls()
-            print("The input value is not valid. Please try again.")
+            print("The input value is not valid. Please try again.") # report invalid input
             input()
-            option1()
+            option1() # return to wave menu
     
 
 def option2():
     cls()
-    print("1) Set loudness")
-    input()
+    print("1) Change volume")
+    print("2) Return to main menu")
+    choose = input()
+    match choose:
+        case '1':
+            cls()
+            print("Increase or decrease loudness by decibels")
+            dbIn = input()
+            try:
+                dbIn = int(dbIn) #convert input into int
+                if dbIn > 0:
+                    cls()
+                    print("Volume increased by", dbIn) # tell user volume increased by specified db
+                    print("Press enter to return to main menu")
+                    input()
+                if dbIn < 0:
+                    cls()
+                    print("Volume decreased by", dbIn) # tell user volume decreased by specified db
+                    print("Press enter to return to main menu")
+                    input()
+            except ValueError:
+                cls()
+                print("Please input a number") # if input isn't number give error
+                input()
+                option2() # return to bpm menu
+            else:
+                db = dbIn
+        case '2': 
+                __name__ == "__main__" # return to main menu
 
 def option3():
     cls()
-    print("Set ABC file path")
-    input()
+    print("1) Set ABC file path")
+    print("2) Return to main menu")
+    choose = input()
 
 def option4():
     cls()
@@ -74,7 +104,7 @@ def option4():
                 cls()
                 print("Please input a number") # if input isn't number give error
                 input()
-                option4()
+                option4() # return to bpm menu
             else:
                 bpm = bpmIn
         case '2': 
@@ -152,7 +182,7 @@ if __name__ == "__main__":
     while(TRUE):
         cls()
         print("1) Choose waveform type")
-        print("2) Set loudness")
+        print("2) Change volume")
         print("3) Set ABC file path")
         print("4) Set BPM (Speed)")
         print("5) Change pitch")
