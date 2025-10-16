@@ -4,10 +4,9 @@ import sys
 import pydub
 from pydub import AudioSegment
 from music21 import converter
-import os
 
 # pydub documentation - https://www.pydub.com/ and https://github.com/jiaaro/pydub/blob/master/API.markdown
-#
+# music21 documentation - https://www.music21.org/music21docs/
 
 def cls():
     os.system('cls' if os.name=='nt' else 'clear')
@@ -85,6 +84,7 @@ def option2():
 
 def option3():
     global output # make abc file a global variable so other functions can access it
+    global filePath
     cls()
     print("1) Set ABC file path")
     print("2) Return to main menu")
@@ -94,13 +94,17 @@ def option3():
             cls()
             print("Please input file path")
             filePath = input()
-            if filePath.endswith('.wav'):
-                abc = AudioSegment.from_wav(filePath)
-                output = abc
-            elif filePath.endswith('.wav"'):
+            if filePath.endswith('.abc'):
+                abc = converter.parse(filePath)
+                abc.write('midi', fp='temp.mid')
+                wav = AudioSegment.from_file("temp.mid", "wav")
+                output = wav
+            elif filePath.endswith('.abc"'):
                 filePath = filePath.replace('"', "") # remove apostrophes from any imput
-                abc = AudioSegment.from_wav(filePath)
-                output = abc
+                abc = converter.parse(filePath)
+                abc.write('midi', fp='temp.mid')
+                wav = AudioSegment.from_file("temp.mid", "wav")
+                output = wav
             else:
                 print("Not a valid file")
                 input()
@@ -201,9 +205,15 @@ def option9():
         input() # send back to main menu
     
     input()
-    
 
 def option10():
+    global filePath
+    midi = converter.parse(filePath)
+    midi.write('midi', fp='output/output.mid')
+    midi.show('midi')
+
+
+def option11():
     cls()    
     yesNo = input("Are you sure you want to exit the program?(y=yes/n=no)")
     if yesNo=='y':
@@ -223,7 +233,8 @@ if __name__ == "__main__":
         print("7) Mix within external WAV file")
         print("8) Play ABC file")
         print("9) Save as WAV file")
-        print("10) Exit")
+        print("10) Save as MIDI file")
+        print("11) Exit")
         inputText = input("Please select a number between 1 and 10: ")
         match inputText:
             case '1':
@@ -244,8 +255,10 @@ if __name__ == "__main__":
                 option8()
             case '9' :
                 option9()
-            case '10' :
+            case '10':
                 option10()
+            case '11' :
+                option11()
             case _:
                 cls()
                 print("The input value is not valid. Please try again.")
