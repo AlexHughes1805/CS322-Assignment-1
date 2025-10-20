@@ -5,6 +5,7 @@ import pydub
 from pydub import AudioSegment
 from music21 import converter
 
+
 # pydub documentation - https://www.pydub.com/ and https://github.com/jiaaro/pydub/blob/master/API.markdown
 # music21 documentation - https://www.music21.org/music21docs/
 
@@ -147,8 +148,41 @@ def option4():
 
 def option5():
     cls()
-    print("Change pitch")
-    input()
+    print("1) Change pitch")
+    print("2) Return to main menu")
+    select = input()
+    match select:   
+        case '1':
+            cls()
+            print("Please input bpm")
+            pitchIn = input()
+            try:
+                pitchIn = int(pitchIn) #convert input into int
+                cls()
+                if pitchIn > 0:
+                    cls()
+                    print("Volume increased by", pitchIn) # tell user pitch increased by specified hz
+                    print("Press enter to return to main menu")
+                    input()
+                if pitchIn < 0:
+                    cls()
+                    print("Volume decreased by", pitchIn) # tell user pitch decreased by specified hz
+                    print("Press enter to return to main menu")
+                    input()
+            except ValueError:
+                cls()
+                print("Please input a number") # if input isn't number give error
+                input()
+                option4() # return to bpm menu
+            else:
+                pitch = pitchIn
+        case '2': 
+                __name__ == "__main__" # return to main menu
+        case _:
+            cls()
+            print("The input value is not valid. Please try again.")
+            input()
+            option5()
 
 def option6():
     cls()
@@ -206,12 +240,12 @@ def option9():
     
     input()
 
-def option10():
+def option10(out):
     global filePath
     midi = converter.parse(filePath)
-    midi.write('midi', fp='output/output.mid')
+    midi.write('midi', fp=f'output/output{out}.mid')
     midi.show('midi')
-
+    out = out + 1
 
 def option11():
     cls()    
@@ -222,6 +256,7 @@ def option11():
 
 
 if __name__ == "__main__":
+    out = 1
     while(TRUE):
         cls()
         print("1) Choose waveform type")
@@ -256,7 +291,8 @@ if __name__ == "__main__":
             case '9' :
                 option9()
             case '10':
-                option10()
+                option10(out)
+                out = out + 1
             case '11' :
                 option11()
             case _:
