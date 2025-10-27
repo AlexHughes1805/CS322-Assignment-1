@@ -1,18 +1,40 @@
 import os
 from pickle import TRUE
 import sys
-import pyaudio
+import pydub
 import wave
 import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
 from scipy import signal
+from  music21 import converter
 
 
 # pyaudio documentation: https://people.csail.mit.edu/hubert/pyaudio/docs/ and https://people.csail.mit.edu/hubert/pyaudio/
 
 def cls():
     os.system('cls' if os.name=='nt' else 'clear')
+
+def sine(frequency=440.0, duration =1.0, sample_rate=44100, amplitude=0.5):
+    return (np.sin(2*np.pi*np.arange(sample_rate*duration)*frequency/sample_rate)).astype(np.float32)*amplitude
+
+def square(frequency=440.0, duration =1.0, sample_rate=44100, amplitude=0.5):
+    samples= sine(frequency, duration, sample_rate, amplitude)
+    for i in range(0,len(samples)):
+        if samples[i] > 0:
+            samples[i]= amplitude
+        elif samples[i] < 0:
+            samples[i] = -amplitude
+        else:
+            samples[i] = 0.0
+    return samples
+
+def sawtooth(frequency=440.0, duration =1.0, sample_rate=44100, amplitude=0.5):
+    t = np.linspace(0, duration, sample_rate)
+    x= signal.sawtooth(2 * np.pi * frequency * t)
+    x = x * amplitude
+    return x
+
+def triangle(frequency=440.0, duration =1.0, sample_rate=44100, amplitude=0.5):
+    return np.abs(sawtooth(frequency=frequency, duration =duration, sample_rate=sample_rate, amplitude=amplitude))
 
 def option1():
     global output
@@ -28,21 +50,25 @@ def option1():
         case '1':
             cls()
             print("Wave changed to sine wave")
+            output = sine()
             print("Press enter to return to main menu")
             input()
         case '2' :
             cls()
             print("Wave changed to square wave")
+            output = square()
             print("Press enter to return to main menu")
             input()
         case '3' :
             cls()
             print("Wave changed to sawtooth wave")
+            output = sawtooth()
             print("Press enter to return to main menu")
             input()
         case '4' :
             cls()
             print("Wave changed to triangle wave")
+            output = triangle()
             print("Press enter to return to main menu")
             input()
         case '5': 
@@ -100,10 +126,14 @@ def option3():
             print("Please input file path")
             filePath = input()
             if filePath.endswith('.abc'):
-                output = wav
+                temp = converter.parse(filePath)
+                temp.write('midi', fp='temp.mid') # temporarily convert abc to midi
+                output = pydub.AudioSegment.from_file('temp.mid', format='wav') #
             elif filePath.endswith('.abc"'):
                 filePath = filePath.replace('"', "") # remove apostrophes from any imput
-                output = wav
+                temp = converter.parse(filePath)
+                temp.write('midi', fp='temp.mid')
+                output = pydub.AudioSegment.from_file('temp.mid', format='wav') # 
             else:
                 print("Not a valid file")
                 input()
@@ -249,11 +279,9 @@ def option10():
         sys.exit()
 
 if __name__ == "__main__":
-    global filePath
     out = 1
     while(TRUE):
         cls()
-        print("Current file:", filePath)
         print("1) Choose waveform type")
         print("2) Change volume")
         print("3) Set ABC file path")
