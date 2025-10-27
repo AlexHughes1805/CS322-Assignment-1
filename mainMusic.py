@@ -1,18 +1,21 @@
 import os
 from pickle import TRUE
 import sys
-import pydub
-from pydub import AudioSegment
-from music21 import converter
+import pyaudio
+import wave
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from scipy import signal
 
 
-# pydub documentation - https://www.pydub.com/ and https://github.com/jiaaro/pydub/blob/master/API.markdown
-# music21 documentation - https://www.music21.org/music21docs/
+# pyaudio documentation: https://people.csail.mit.edu/hubert/pyaudio/docs/ and https://people.csail.mit.edu/hubert/pyaudio/
 
 def cls():
     os.system('cls' if os.name=='nt' else 'clear')
 
 def option1():
+    global output
     cls()
     print("Choose waveform type")
     print("1) Sine wave")
@@ -52,6 +55,7 @@ def option1():
     
 
 def option2():
+    global output
     cls()
     print("1) Change volume")
     print("2) Return to main menu")
@@ -96,15 +100,9 @@ def option3():
             print("Please input file path")
             filePath = input()
             if filePath.endswith('.abc'):
-                abc = converter.parse(filePath)
-                abc.write('midi', fp='temp.mid')
-                wav = AudioSegment.from_file("temp.mid", "wav")
                 output = wav
             elif filePath.endswith('.abc"'):
                 filePath = filePath.replace('"', "") # remove apostrophes from any imput
-                abc = converter.parse(filePath)
-                abc.write('midi', fp='temp.mid')
-                wav = AudioSegment.from_file("temp.mid", "wav")
                 output = wav
             else:
                 print("Not a valid file")
@@ -115,6 +113,7 @@ def option3():
              __name__ == "__main__" # return to main menu
 
 def option4():
+    global output
     cls()
     print("1) Set BPM (Speed)")
     print("2) Return to main menu")
@@ -147,6 +146,7 @@ def option4():
     
 
 def option5():
+    global output
     cls()
     print("1) Change pitch")
     print("2) Return to main menu")
@@ -185,6 +185,7 @@ def option5():
             option5()
 
 def option6():
+    global output
     cls()
     print("Add background noise")
     print("1) White noise")
@@ -218,6 +219,7 @@ def option6():
 
 
 def option7():
+    global output
     cls()
     print("Mix within external WAV file")
     input()
@@ -240,25 +242,18 @@ def option9():
     
     input()
 
-def option10(out):
-    global filePath
-    midi = converter.parse(filePath)
-    midi.write('midi', fp=f'output/output{out}.mid')
-    midi.show('midi')
-    out = out + 1
-
-def option11():
+def option10():
     cls()    
     yesNo = input("Are you sure you want to exit the program?(y=yes/n=no)")
     if yesNo=='y':
         sys.exit()
 
-
-
 if __name__ == "__main__":
+    global filePath
     out = 1
     while(TRUE):
         cls()
+        print("Current file:", filePath)
         print("1) Choose waveform type")
         print("2) Change volume")
         print("3) Set ABC file path")
@@ -268,8 +263,7 @@ if __name__ == "__main__":
         print("7) Mix within external WAV file")
         print("8) Play ABC file")
         print("9) Save as WAV file")
-        print("10) Save as MIDI file")
-        print("11) Exit")
+        print("10) Exit")
         inputText = input("Please select a number between 1 and 10: ")
         match inputText:
             case '1':
@@ -291,10 +285,7 @@ if __name__ == "__main__":
             case '9' :
                 option9()
             case '10':
-                option10(out)
-                out = out + 1
-            case '11' :
-                option11()
+                option10()
             case _:
                 cls()
                 print("The input value is not valid. Please try again.")
