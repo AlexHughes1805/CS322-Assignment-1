@@ -7,6 +7,7 @@ import numpy as np
 from scipy import signal
 from  music21 import converter
 import time
+from midi2audio import FluidSynth
 
 
 # pyaudio documentation: https://people.csail.mit.edu/hubert/pyaudio/docs/ and https://people.csail.mit.edu/hubert/pyaudio/
@@ -114,7 +115,7 @@ def option2(): # adjust volume
         case '2': 
                 __name__ == "__main__" # return to main menu
 
-def option3():
+def option3(): # import abc file and convert to wav
     global output # make abc file a global variable so other functions can access it
     global filePath
     cls()
@@ -136,7 +137,8 @@ def option3():
                 temp = converter.parse(filePath)
                 temp.write('midi', fp='temp.mid')
                 time.sleep(1) # wait for file to be written
-                output = pydub.AudioSegment.from_file('temp.mid', format='wav') #convert midi to audio segment
+                FluidSynth().midi_to_audio('temp.mid', 'output.wav')
+                # output = pydub.AudioSegment.from_file('temp.mid', format='wav') #convert midi to wav
             else:
                 print("Not a valid file")
                 input()
@@ -145,7 +147,7 @@ def option3():
         case '2':
              __name__ == "__main__" # return to main menu
 
-def option4():
+def option4(): # chance the tempo of the song
     global output
     cls()
     print("1) Set BPM (Speed)")
@@ -257,36 +259,62 @@ def option7():
 def option8():
     global output
     cls()
-    print("1) Play ABC file")
-    print("2) Return to main menu")
-    input()
+    try: # see if there is a wav file to download
+        output
+    except:
+        print("No file to download!")
+        print("Returning to main menu")
+        time.sleep(2) # wait 2 seconds before returning to main menu
+        __name__ == "__main__" # return to main menu
+    else:
+        print("1) Play ABC file")
+        print("2) Return to main menu")
+        choose = input()
+        match choose:
+            case '1':
+                cls()
+                print("Playing ABC file")
+
+            case '2':
+                __name__ == "__main__" # return to main menu
+            
+            case _:
+                cls()
+                print("The input value is not valid. Please try again.")
+                input()
+                option9()
 
 def option9():
     global output
     cls()
-    print("1) Save as WAV file")
-    print("2) Return to main menu")
+    try: # see if there is a wav file to download
+        output
+    except:
+        print("No file to download!")
+        print("Returning to main menu")
+        time.sleep(2) # wait 2 seconds before returning to main menu
+        __name__ == "__main__" # return to main menu
+    else:
+        print("1) Save as WAV file")
+        print("2) Return to main menu")
 
-    choose = input()
-    match choose:
-        case '1':
-            cls()
-            print("Name your file")
-            name = input
-            output.export(f'output\{name}.wav', format='wav')
-            print("File saved to output")
-            if not output:
-                print("No file to download!")
-                input() # send back to main menu
+        choose = input()
+        match choose:
+            case '1':
+                cls()
+                print("Name your file")
+                name = input
+                output.export(f'output\{name}.wav', format='wav')
+                print("File saved to output")
 
-        case '2':
-             __name__ == "__main__" # return to main menu
-        
-        case _:
-            cls()
-            print("The input value is not valid. Please try again.")
-            input()
-            option9()
+            case '2':
+                __name__ == "__main__" # return to main menu
+            
+            case _:
+                cls()
+                print("The input value is not valid. Please try again.")
+                input()
+                option9()
     
     
     input()
@@ -337,4 +365,3 @@ if __name__ == "__main__":
                 cls()
                 print("The input value is not valid. Please try again.")
                 input()
-    
