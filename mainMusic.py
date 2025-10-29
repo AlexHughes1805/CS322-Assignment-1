@@ -125,19 +125,21 @@ def option3(): # import abc file and convert to wav
     match choose:
         case '1':
             cls()
+            fs = FluidSynth("soundfont.sf2") # load soundfont for midi to audio conversion
             print("Please input file path")
             filePath = input()
             if filePath.endswith('.abc'):
                 temp = converter.parse(filePath)
                 temp.write('midi', fp='temp.mid') # temporarily convert abc to midi
                 time.sleep(1) # wait for file to be written
-                output = pydub.AudioSegment.from_file('temp.mid', format='midi') # convert midi to audio segment
+                fs.midi_to_audio('temp.mid', 'temp.wav') # convert temp midi to temp wav
+                # output = pydub.AudioSegment.from_file('temp.mid', format='midi') # convert midi to audio segment
             elif filePath.endswith('.abc"'):
                 filePath = filePath.replace('"', "") # remove apostrophes from any imput
                 temp = converter.parse(filePath)
                 temp.write('midi', fp='temp.mid')
                 time.sleep(1) # wait for file to be written
-                FluidSynth().midi_to_audio('temp.mid', 'output.wav')
+                fs.midi_to_audio('temp.mid', 'temp.wav') # convert temp midi to temp wav
                 # output = pydub.AudioSegment.from_file('temp.mid', format='wav') #convert midi to wav
             else:
                 print("Not a valid file")
@@ -304,7 +306,7 @@ def option9():
                 cls()
                 print("Name your file")
                 name = input
-                output.export(f'output\{name}.wav', format='wav')
+                output.export(f'Output\{name}.wav', format='wav')
                 print("File saved to output")
 
             case '2':
@@ -321,7 +323,9 @@ def option9():
 
 def option10():
     cls()    
-    yesNo = input("Are you sure you want to exit the program?(y=yes/n=no)")
+    print("Are you sure you want to exit the program?")
+    print("(y=yes/n=no)")
+    yesNo = input()
     if yesNo=='y':
         sys.exit()
 
