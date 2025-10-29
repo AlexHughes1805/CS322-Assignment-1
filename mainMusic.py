@@ -6,6 +6,7 @@ import wave
 import numpy as np
 from scipy import signal
 from  music21 import converter
+import time
 
 
 # pyaudio documentation: https://people.csail.mit.edu/hubert/pyaudio/docs/ and https://people.csail.mit.edu/hubert/pyaudio/
@@ -36,7 +37,7 @@ def sawtooth(frequency=440.0, duration =1.0, sample_rate=44100, amplitude=0.5):
 def triangle(frequency=440.0, duration =1.0, sample_rate=44100, amplitude=0.5):
     return np.abs(sawtooth(frequency=frequency, duration =duration, sample_rate=sample_rate, amplitude=amplitude))
 
-def option1():
+def option1(): # change waveform type
     global output
     cls()
     print("Choose waveform type")
@@ -80,7 +81,7 @@ def option1():
             option1() # return to wave menu
     
 
-def option2():
+def option2(): # adjust volume
     global output
     cls()
     print("1) Change volume")
@@ -96,11 +97,13 @@ def option2():
                 if dbIn > 0:
                     cls()
                     print("Volume increased by", dbIn) # tell user volume increased by specified db
+                    output = output + dbIn
                     print("Press enter to return to main menu")
                     input()
                 if dbIn < 0:
                     cls()
                     print("Volume decreased by", dbIn) # tell user volume decreased by specified db
+                    output = output - dbIn
                     print("Press enter to return to main menu")
                     input()
             except ValueError:
@@ -108,8 +111,6 @@ def option2():
                 print("Please input a number") # if input isn't number give error
                 input()
                 option2() # return to bpm menu
-            else:
-                db = dbIn
         case '2': 
                 __name__ == "__main__" # return to main menu
 
@@ -128,12 +129,14 @@ def option3():
             if filePath.endswith('.abc'):
                 temp = converter.parse(filePath)
                 temp.write('midi', fp='temp.mid') # temporarily convert abc to midi
-                output = pydub.AudioSegment.from_file('temp.mid', format='wav') #
+                time.sleep(1) # wait for file to be written
+                output = pydub.AudioSegment.from_file('temp.mid', format='midi') # convert midi to audio segment
             elif filePath.endswith('.abc"'):
                 filePath = filePath.replace('"', "") # remove apostrophes from any imput
                 temp = converter.parse(filePath)
                 temp.write('midi', fp='temp.mid')
-                output = pydub.AudioSegment.from_file('temp.mid', format='wav') # 
+                time.sleep(1) # wait for file to be written
+                output = pydub.AudioSegment.from_file('temp.mid', format='wav') #convert midi to audio segment
             else:
                 print("Not a valid file")
                 input()
@@ -164,8 +167,6 @@ def option4():
                 print("Please input a number") # if input isn't number give error
                 input()
                 option4() # return to bpm menu
-            else:
-                bpm = bpmIn
         case '2': 
                 __name__ == "__main__" # return to main menu
         case _:
@@ -184,7 +185,7 @@ def option5():
     match select:   
         case '1':
             cls()
-            print("Please input bpm")
+            print("Please input pitch change in Hz")
             pitchIn = input()
             try:
                 pitchIn = int(pitchIn) #convert input into int
@@ -204,8 +205,6 @@ def option5():
                 print("Please input a number") # if input isn't number give error
                 input()
                 option4() # return to bpm menu
-            else:
-                pitch = pitchIn
         case '2': 
                 __name__ == "__main__" # return to main menu
         case _:
@@ -251,24 +250,44 @@ def option6():
 def option7():
     global output
     cls()
-    print("Mix within external WAV file")
+    print("1) Mix within external WAV file")
+    print("2) Return to main menu")
     input()
 
 def option8():
     global output
     cls()
-    print("Play ABC file")
-    output.show('midi')
+    print("1) Play ABC file")
+    print("2) Return to main menu")
     input()
 
 def option9():
     global output
     cls()
-    output.export(r'output\test.wav', format='wav')
-    print("File saved to output")
-    if not output:
-        print("No file to download!")
-        input() # send back to main menu
+    print("1) Save as WAV file")
+    print("2) Return to main menu")
+
+    choose = input()
+    match choose:
+        case '1':
+            cls()
+            print("Name your file")
+            name = input
+            output.export(f'output\{name}.wav', format='wav')
+            print("File saved to output")
+            if not output:
+                print("No file to download!")
+                input() # send back to main menu
+
+        case '2':
+             __name__ == "__main__" # return to main menu
+        
+        case _:
+            cls()
+            print("The input value is not valid. Please try again.")
+            input()
+            option9()
+    
     
     input()
 
