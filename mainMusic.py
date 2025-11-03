@@ -2,6 +2,7 @@ import os
 from pickle import TRUE
 import sys
 import pydub
+from pydub import effects
 import wave
 import numpy as np
 from scipy import signal
@@ -15,6 +16,7 @@ from midi2audio import FluidSynth
 def cls():
     os.system('cls' if os.name=='nt' else 'clear')
 
+#waveform code is from the provided python files
 def sine(frequency=440.0, duration =1.0, sample_rate=44100, amplitude=0.5):
     return (np.sin(2*np.pi*np.arange(sample_rate*duration)*frequency/sample_rate)).astype(np.float32)*amplitude
 
@@ -117,7 +119,9 @@ def option2(): # adjust volume
 
 def option3(): # import abc file and convert to wav
     global output # make abc file a global variable so other functions can access it
-    global filePath
+    temp_mid = os.path.abspath('temp.mid')
+    sf = os.path.abspath('soundfont.sf2')
+    fs = FluidSynth('soundfont.sf2s')
     cls()
     print("1) Set ABC file path")
     print("2) Return to main menu")
@@ -125,22 +129,17 @@ def option3(): # import abc file and convert to wav
     match choose:
         case '1':
             cls()
-            fs = FluidSynth("soundfont.sf2") # load soundfont for midi to audio conversion
+            # fs = FluidSynth(sound_font=sf, sample_rate=22050) # load soundfont for midi to audio conversion
             print("Please input file path")
             filePath = input()
+            filePath = filePath.replace('"', "") # remove any apostrophes in filepath
+            filePath = os.path.abspath(filePath)
             if filePath.endswith('.abc'):
                 temp = converter.parse(filePath)
                 temp.write('midi', fp='temp.mid') # temporarily convert abc to midi
                 time.sleep(1) # wait for file to be written
-                fs.midi_to_audio('temp.mid', 'temp.wav') # convert temp midi to temp wav
+                fs.midi_to_audio(temp_mid, 'temp.wav') # convert temp midi to temp wav
                 # output = pydub.AudioSegment.from_file('temp.mid', format='midi') # convert midi to audio segment
-            elif filePath.endswith('.abc"'):
-                filePath = filePath.replace('"', "") # remove apostrophes from any imput
-                temp = converter.parse(filePath)
-                temp.write('midi', fp='temp.mid')
-                time.sleep(1) # wait for file to be written
-                fs.midi_to_audio('temp.mid', 'temp.wav') # convert temp midi to temp wav
-                # output = pydub.AudioSegment.from_file('temp.mid', format='wav') #convert midi to wav
             else:
                 print("Not a valid file")
                 input()
@@ -148,6 +147,12 @@ def option3(): # import abc file and convert to wav
             
         case '2':
              __name__ == "__main__" # return to main menu
+
+def changeBPM(seg, change: float):
+    if change == 1.0:
+        return seg
+    if change > 1.0:
+        return effects.speedup(seg, play)
 
 def option4(): # chance the tempo of the song
     global output
@@ -163,9 +168,14 @@ def option4(): # chance the tempo of the song
             try:
                 bpmIn = int(bpmIn) #convert input into int
                 cls()
-                print("BPM set to", bpmIn) # tell user the bpm changed
-                print("Press enter to return to main menu")
-                input()
+                if 'output' in globals() and isinstance(output, pydub.AudioSegment):
+                    change = bpmIn / float(bpm) if bpm != 0 else 1.0
+                    output = changeBPM(output, change)
+                    print("BPM set to", bpmIn) # tell user the bpm changed
+                    print("Press enter to return to main menu")
+                    input()
+                else:
+                    bpm = bpmIn
             except ValueError:
                 cls()
                 print("Please input a number") # if input isn't number give error
@@ -261,14 +271,7 @@ def option7():
 def option8():
     global output
     cls()
-    try: # see if there is a wav file to download
-        output
-    except:
-        print("No file to download!")
-        print("Returning to main menu")
-        time.sleep(2) # wait 2 seconds before returning to main menu
-        __name__ == "__main__" # return to main menu
-    else:
+    if 'output' in globals() and isinstance(output, pydub.AudioSegment):
         print("1) Play ABC file")
         print("2) Return to main menu")
         choose = input()
@@ -285,6 +288,12 @@ def option8():
                 print("The input value is not valid. Please try again.")
                 input()
                 option9()
+    else:
+        print("No file to download!")
+        print("Returning to main menu")
+        time.sleep(2) # wait 2 seconds before returning to main menu
+        __name__ == "__main__" # return to main menu
+        
 
 def option9():
     global output
