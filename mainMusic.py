@@ -16,11 +16,13 @@ import soundfile
 # pydub documentation - https://github.com/jiaaro/pydub/blob/master/API.markdown and https://github.com/jiaaro/pydub/tree/master/pydub
 # music21 documentation https://www.music21.org/music21docs/
 # pretty_midi documentation - https://craffel.github.io/pretty-midi/
+# soundfile documenation - https://python-soundfile.readthedocs.io/en/0.13.1/#module-soundfile
+# menu layout from MakingMenu.py on Moodle
 
 def cls():
     os.system('cls' if os.name=='nt' else 'clear')
 
-#code from the provided waveAudio.py file
+# Wave code from provided waveAudio.py file
 def sine(frequency=440.0, duration =1.0, sample_rate=44100, amplitude=0.5):
     return (np.sin(2*np.pi*np.arange(sample_rate*duration)*frequency/sample_rate)).astype(np.float32)*amplitude
 
@@ -326,15 +328,55 @@ def option7():
     global output
     cls()
     if 'output' in globals() and isinstance(output, pydub.AudioSegment):
-        print("1) Mix within external WAV file")
+        print("1) Mix with an external WAV file")
         print("2) Return to main menu")
-        input()
-
+        choose = input()
+        match choose:
+            case '1':
+                cls()
+                print("Please input file path")
+                filePath = input()
+                filePath = filePath.replace('"', "") # remove any apostrophes in filepath
+                filePath = os.path.abspath(filePath)
+                if filePath.endswith('.wav'):
+                    wav2 = pydub.AudioSegment.from_file(filePath, format='wav') # convert midi to audio segment
+                    output = output + wav2 # concatenate the two audios
+                else:
+                    print("Not a valid file")
+                    input()
+                    option3()
+            case '2':
+                __name__ == "__main__" # return to main menu
     else:
         print("No file loaded")
         print("Returning to main menu")
         time.sleep(2) # wait 2 seconds before returning to main menu
         __name__ == "__main__" # return to main menu
+
+def playback():
+    global output
+    play(output) # play music
+
+def playing():
+    playing = True
+    cls()
+    print("Playing ABC file")
+    print("Press any key to stop playback")
+    while playing is True:
+        try:
+            playback()
+        except KeyboardInterrupt: # stop audio if user inputs anything
+            cls()
+            playing = False
+            print("Playback stopped")
+            print("1) Play again")
+            print("2) Return to menu")
+            choice = input()
+            match choice:
+                case '1':
+                    playing() # play audio again
+                case '2':
+                    __name__ == "__main__" # return to main menu
 
 def option8():
     global output
@@ -345,9 +387,7 @@ def option8():
         choose = input()
         match choose:
             case '1':
-                cls()
-                print("Playing ABC file")
-                play(output)
+                playing()
                 input()
             case '2':
                 __name__ == "__main__" # return to main menu
