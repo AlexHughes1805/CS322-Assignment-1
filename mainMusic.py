@@ -61,25 +61,25 @@ def option1(): # change waveform type
             case '1':
                 cls()
                 print("Wave changed to sine wave")
-                output = sine()
+                output = output + sine()
                 print("Press enter to return to main menu")
                 input()
             case '2' :
                 cls()
                 print("Wave changed to square wave")
-                output = square()
+                output = output + square()
                 print("Press enter to return to main menu")
                 input()
             case '3' :
                 cls()
                 print("Wave changed to sawtooth wave")
-                output = sawtooth()
+                output = output + sawtooth()
                 print("Press enter to return to main menu")
                 input()
             case '4' :
                 cls()
                 print("Wave changed to triangle wave")
-                output = triangle()
+                output = output + triangle()
                 print("Press enter to return to main menu")
                 input()
             case '5': 
@@ -295,19 +295,19 @@ def option6():
             case '1':
                 cls()
                 print("Added white noise")
-                output = white(output)
+                output = output + white(output)
                 print("Press enter to return to main menu")
                 input()
             case '2':
                 cls()
                 print("Added pink noise")
-                output = pink(output)
+                output = output + pink(output)
                 print("Press enter to return to main menu")
                 input()
             case '3':
                 cls()
                 print("Added brown noise")
-                output = brown(output)
+                output = output + brown(output)
                 print("Press enter to return to main menu")
                 input()
             case '4':
