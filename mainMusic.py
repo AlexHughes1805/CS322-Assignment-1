@@ -2,7 +2,8 @@ import os
 from pickle import TRUE
 import sys
 import pydub
-from pydub import effects, playback
+from pydub import effects, playback, AudioSegment
+from pydub.generators import Sine, Triangle, Square, Sawtooth
 import numpy as np
 from scipy import signal
 from  music21 import converter
@@ -10,9 +11,10 @@ import time
 import acoustics
 import pretty_midi
 import soundfile
-import keyboard
+import array
 
-
+# install pyfluidsynth, simpleaudio and audioop-lts using pip
+# install fluidsynth using chocolately
 # pydub documentation - https://github.com/jiaaro/pydub/blob/master/API.markdown and https://github.com/jiaaro/pydub/tree/master/pydub
 # music21 documentation https://www.music21.org/music21docs/
 # pretty_midi documentation - https://craffel.github.io/pretty-midi/
@@ -22,12 +24,31 @@ import keyboard
 def cls():
     os.system('cls' if os.name=='nt' else 'clear')
 
+def numpyToAudio(samples, sample_rate=44100):
+    # convert numpy array to audio segment
+
+    samples = samples.astype(np.float32) # float32 format 
+    
+    samples = (samples * 32767).astype(np.int16) # 16 bit integer range
+    
+    # convert to bytes
+    byte_array = array.array('h', samples).tobytes()
+    
+    # Create AudioSegment
+    return AudioSegment(
+        byte_array,
+        frame_rate=sample_rate,
+        sample_width=2,  # 2 bytes for int16
+        channels=1  # mono
+    )
+
 # Wave code from provided waveAudio.py file
 def sine(frequency=440.0, duration =1.0, sample_rate=44100, amplitude=0.5):
-    return (np.sin(2*np.pi*np.arange(sample_rate*duration)*frequency/sample_rate)).astype(np.float32)*amplitude
+    sineWave = (np.sin(2*np.pi*np.arange(sample_rate*duration)*frequency/sample_rate)).astype(np.float32)*amplitude
+    return numpyToAudio(sineWave, sample_rate)
 
 def square(frequency=440.0, duration =1.0, sample_rate=44100, amplitude=0.5):
-    samples= sine(frequency, duration, sample_rate, amplitude)
+    samples = sine(frequency, duration, sample_rate, amplitude)
     for i in range(0,len(samples)):
         if samples[i] > 0:
             samples[i]= amplitude
@@ -35,16 +56,17 @@ def square(frequency=440.0, duration =1.0, sample_rate=44100, amplitude=0.5):
             samples[i] = -amplitude
         else:
             samples[i] = 0.0
-    return samples
+    return numpyToAudio(samples, sample_rate)
 
 def sawtooth(frequency=440.0, duration =1.0, sample_rate=44100, amplitude=0.5):
     t = np.linspace(0, duration, sample_rate)
     x= signal.sawtooth(2 * np.pi * frequency * t)
     x = x * amplitude
-    return x
+    return numpyToAudio(x, sample_rate)
 
 def triangle(frequency=440.0, duration =1.0, sample_rate=44100, amplitude=0.5):
-    return np.abs(sawtooth(frequency=frequency, duration =duration, sample_rate=sample_rate, amplitude=amplitude))
+    samples = np.abs(sawtooth(frequency=frequency, duration =duration, sample_rate=sample_rate, amplitude=amplitude))
+    return numpyToAudio(samples, sample_rate)
 
 def option1(): # change waveform type
     global output
@@ -61,25 +83,25 @@ def option1(): # change waveform type
             case '1':
                 cls()
                 print("Wave changed to sine wave")
-                output = output + sine()
+                output = sine()
                 print("Press enter to return to main menu")
                 input()
             case '2' :
                 cls()
                 print("Wave changed to square wave")
-                output = output + square()
+                output = square()
                 print("Press enter to return to main menu")
                 input()
             case '3' :
                 cls()
                 print("Wave changed to sawtooth wave")
-                output = output + sawtooth()
+                output = sawtooth()
                 print("Press enter to return to main menu")
                 input()
             case '4' :
                 cls()
                 print("Wave changed to triangle wave")
-                output = output + triangle()
+                output = triangle()
                 print("Press enter to return to main menu")
                 input()
             case '5': 
@@ -107,7 +129,7 @@ def option2(): # adjust volume
         match choose:
             case '1':
                 cls()
-                print("Increase or decrease loudness by decibels")
+                print("Please input the increase or decrease loudness by decibels")
                 dbIn = input()
                 try:
                     dbIn = int(dbIn) #convert input into int
@@ -176,6 +198,14 @@ def changeBPM(seg, change: float):
     else:
         newSpeed = max(1, int(seg.frane_rate * change)) # slowing down playback speed
         return seg.spawn(seg.raw_data, overrides={'frame_rate': newSpeed}).set_frame_rate(seg.frame_rate)
+    
+def speed_change(sound, speed=1.0):
+    # how many samples per second
+    soundAltered = sound._spawn(sound.raw_data, overrides={
+        "frame_rate": int(sound.frame_rate * speed)
+    })
+
+    return soundAltered.set_frame_rate(sound.frame_rate)
 
 def option4(): # chance the tempo of the song
     global output
@@ -187,15 +217,22 @@ def option4(): # chance the tempo of the song
         match select:   
             case '1':
                 cls()
-                print("Please input bpm")
+                print("Please input bpm change as a float (1.50 will increase speed to 150%, 0.5 will decrease speed to 50%)")
                 bpmIn = input()
                 try:
-                    bpmIn = int(bpmIn) #convert input into int
+                    tempo = float(bpmIn)  # convert input into float
+                    percent = tempo * 100
+                    if tempo <= 0:
+                        raise ValueError("Speed multiplier must be positive")
+                        
                     cls()
-                    change = bpmIn / float(bpmIn) if bpmIn != 0 else 1.0
-                    output = changeBPM(output, change)
-                    print("BPM set to", bpmIn) # tell user the bpm changed
-                    print("Press enter to return to main menu")
+                    # Use pydub's speedup function for tempo change
+                    if tempo > 1.0:
+                        print("Speed increased to", percent, "%")
+                        output = speed_change(output, tempo)
+                    else:
+                        print("Speed decreased to", percent, "%")
+                        output = speed_change(output, tempo)
                     input()
                 except ValueError:
                     cls()
@@ -268,18 +305,18 @@ def option5():
         time.sleep(2) # wait 2 seconds before returning to main menu
         __name__ == "__main__" # return to main menu
 
-# code from provided noise.py
-def white(output):
-    output = acoustics.generator.noise(44100*10, color='white', state=None)
-    return output
+# code from provided noise.py on moodle
+def white():
+    whiteNoise = acoustics.generator.noise(44100*10, color='white', state=None)
+    return numpyToAudio(whiteNoise)
 
-def pink(output):
-    output = acoustics.generator.noise(44100*10, color='pink', state=None)
-    return output
+def pink():
+    pinkNoise = acoustics.generator.noise(44100*10, color='pink', state=None)
+    return numpyToAudio(pinkNoise)
 
-def brown(output):
-    output = acoustics.generator.noise(44100*10, color='brown', state=None)
-    return output
+def brown():
+    brownNoise = acoustics.generator.noise(44100*10, color='brown', state=None)
+    return numpyToAudio(brownNoise)
 
 def option6():
     global output
@@ -295,19 +332,22 @@ def option6():
             case '1':
                 cls()
                 print("Added white noise")
-                output = output + white(output)
+                noise = white()
+                output = output.overlay(noise)
                 print("Press enter to return to main menu")
                 input()
             case '2':
                 cls()
                 print("Added pink noise")
-                output = output + pink(output)
+                noise = pink()
+                output = output.overlay(noise)
                 print("Press enter to return to main menu")
                 input()
             case '3':
                 cls()
                 print("Added brown noise")
-                output = output + brown(output)
+                noise = brown()
+                output = output.overlay(noise)
                 print("Press enter to return to main menu")
                 input()
             case '4':
@@ -340,7 +380,7 @@ def option7():
                 filePath = os.path.abspath(filePath)
                 if filePath.endswith('.wav'):
                     wav2 = pydub.AudioSegment.from_file(filePath, format='wav') # convert midi to audio segment
-                    output = output + wav2 # concatenate the two audios
+                    output = output.overlay(wav2) # overlay the second wav
                 else:
                     print("Not a valid file")
                     input()
@@ -352,6 +392,9 @@ def option7():
         print("Returning to main menu")
         time.sleep(2) # wait 2 seconds before returning to main menu
         __name__ == "__main__" # return to main menu
+
+def playing(output):
+    playback._play_with_simpleaudio(output)
 
 def option8():
     global output
@@ -365,19 +408,12 @@ def option8():
                 cls()
                 print("Playing ABC file")
                 print("Press enter to stop playback")
-                play = playback._play_with_simpleaudio(output)
+                play = playing(output)
                 input() # stop audio if user presses enter
-                play.stop()
-                cls()
-                print("Playback stopped")
-                print("1) Play again")
-                print("2) Return to menu")
-                choice = input()
-                match choice:
-                    case '1':
-                        option8() # play audio again
-                    case '2':
-                        __name__ == "__main__" # return to main menu
+                #if play.is_playing():
+                 #   play.stop()
+                  #  play = None
+                __name__ == "__main__" 
             case '2':
                 __name__ == "__main__" # return to main menu
             case _:
@@ -441,7 +477,6 @@ def option10():
         sys.exit()
 
 if __name__ == "__main__":
-    out = 1
     while(TRUE):
         cls()
         print("1) Choose waveform type")
