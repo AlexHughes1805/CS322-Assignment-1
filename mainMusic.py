@@ -21,7 +21,7 @@ import array
 # soundfile documenation - https://python-soundfile.readthedocs.io/en/0.13.1/#module-soundfile
 # menu layout from MakingMenu.py on Moodle
 
-def cls():
+def cls(): # provided on Moodle
     os.system('cls' if os.name=='nt' else 'clear')
 
 def numpyToAudio(samples, sample_rate=44100):
@@ -199,7 +199,7 @@ def changeBPM(seg, change: float):
         newSpeed = max(1, int(seg.frane_rate * change)) # slowing down playback speed
         return seg.spawn(seg.raw_data, overrides={'frame_rate': newSpeed}).set_frame_rate(seg.frame_rate)
     
-def speed_change(sound, speed=1.0):
+def changeTempo(sound, speed=1.0):
     # how many samples per second
     soundAltered = sound._spawn(sound.raw_data, overrides={
         "frame_rate": int(sound.frame_rate * speed)
@@ -229,14 +229,14 @@ def option4(): # chance the tempo of the song
                     # Use pydub's speedup function for tempo change
                     if tempo > 1.0:
                         print("Speed increased to", percent, "%")
-                        output = speed_change(output, tempo)
+                        output = changeTempo(output, tempo)
                     else:
                         print("Speed decreased to", percent, "%")
-                        output = speed_change(output, tempo)
+                        output = changeTempo(output, tempo)
                     input()
                 except ValueError:
                     cls()
-                    print("Please input a number") # if input isn't number give error
+                    print("Please input a number as a float") # if input isn't number and/or a float give error
                     input()
                     option4() # return to bpm menu
             case '2': 
@@ -263,10 +263,10 @@ def option5():
         match select:   
             case '1':
                 cls()
-                print("Please input pitch change in octaves")
+                print("Please input pitch change in octaves as a float")
                 pitchIn = input()
                 try:
-                    pitchIn = int(pitchIn) #convert input into int
+                    pitchIn = float(pitchIn) #convert input into float
                     cls()
                     if pitchIn > 0:
                         cls()
@@ -274,6 +274,7 @@ def option5():
                         octaves = pitchIn
                         newSample = int(output.frame_rate * (2.0 ** octaves))
                         newPitch = output._spawn(output.raw_data, overrides={'frame_rate': newSample})
+                        newPitch = newPitch.set_frame_rate(44100)
                         output = newPitch
                         print("Press enter to return to main menu")
                         input()
@@ -283,12 +284,13 @@ def option5():
                         octaves = pitchIn
                         newSample = int(output.frame_rate * (2.0 ** octaves))
                         newPitch = output._spawn(output.raw_data, overrides={'frame_rate': newSample})
+                        newPitch = newPitch.set_frame_rate(44100)
                         output = newPitch
                         print("Press enter to return to main menu")
                         input()
                 except ValueError:
                     cls()
-                    print("Please input a number") # if input isn't number give error
+                    print("Please input a number as a float") # if input isn't number give error
                     input()
                     option5() # return to pitch menu
             case '2': 
@@ -393,13 +395,11 @@ def option7():
         time.sleep(2) # wait 2 seconds before returning to main menu
         __name__ == "__main__" # return to main menu
 
-def playing(output):
-    playback._play_with_simpleaudio(output)
-
 def option8():
     global output
     cls()
     if output is not None:
+        print("Warning: Letting the audio play through or stopping the audio early ends the program")
         print("1) Play ABC file")
         print("2) Return to main menu")
         choose = input()
@@ -408,12 +408,10 @@ def option8():
                 cls()
                 print("Playing ABC file")
                 print("Press enter to stop playback")
-                play = playing(output)
+                play = playback._play_with_simpleaudio(output)
                 input() # stop audio if user presses enter
-                #if play.is_playing():
-                 #   play.stop()
-                  #  play = None
-                __name__ == "__main__" 
+                play.stop()
+                cls()
             case '2':
                 __name__ == "__main__" # return to main menu
             case _:
@@ -467,7 +465,7 @@ def option9():
         time.sleep(2) # wait 2 seconds before returning to main menu
         __name__ == "__main__" # return to main menu
 
-def option10():
+def option10(): # provided on Moodle
     cls()    
     print("Are you sure you want to exit the program?")
     print("[y=yes/n=no]")
@@ -476,7 +474,7 @@ def option10():
         os.remove("temp.wav") # remove any temporary files
         sys.exit()
 
-if __name__ == "__main__":
+if __name__ == "__main__": # menu provided on Moodle
     while(TRUE):
         cls()
         print("1) Choose waveform type")
