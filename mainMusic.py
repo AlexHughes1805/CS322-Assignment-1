@@ -2,8 +2,7 @@ import os
 from pickle import TRUE
 import sys
 import pydub
-from pydub import effects
-from pydub.playback import play
+from pydub import effects, playback
 import numpy as np
 from scipy import signal
 from  music21 import converter
@@ -11,6 +10,7 @@ import time
 import acoustics
 import pretty_midi
 import soundfile
+import keyboard
 
 
 # pydub documentation - https://github.com/jiaaro/pydub/blob/master/API.markdown and https://github.com/jiaaro/pydub/tree/master/pydub
@@ -49,7 +49,7 @@ def triangle(frequency=440.0, duration =1.0, sample_rate=44100, amplitude=0.5):
 def option1(): # change waveform type
     global output
     cls()
-    if 'output' in globals() and isinstance(output, pydub.AudioSegment):
+    if output is not None:
         print("Choose waveform type")
         print("1) Sine wave")
         print("2) Square wave")
@@ -100,7 +100,7 @@ def option1(): # change waveform type
 def option2(): # adjust volume
     global output
     cls()
-    if 'output' in globals() and isinstance(output, pydub.AudioSegment):
+    if output is not None:
         print("1) Change volume")
         print("2) Return to main menu")
         choose = input()
@@ -159,7 +159,7 @@ def option3(): # import abc file and convert to wav
                 soundfile.write("temp.wav", audio, 44100) # write wav file that user will handle and edit
                 time.sleep(1) # wait for wav file
                 os.remove("temp.mid") # delete temp midi file
-                output = pydub.AudioSegment.from_file('temp.wav', format='wav') # convert midi to audio segment
+                output = pydub.AudioSegment.from_wav('temp.wav') # convert midi to audio segment
             else:
                 print("Not a valid file")
                 input()
@@ -180,7 +180,7 @@ def changeBPM(seg, change: float):
 def option4(): # chance the tempo of the song
     global output
     cls()
-    if 'output' in globals() and isinstance(output, pydub.AudioSegment):
+    if output is not None:
         print("1) Set BPM (Speed)")
         print("2) Return to main menu")
         select = input()
@@ -219,7 +219,7 @@ def option4(): # chance the tempo of the song
 def option5():
     global output
     cls()
-    if 'output' in globals() and isinstance(output, pydub.AudioSegment):
+    if output is not None:
         print("1) Change pitch")
         print("2) Return to main menu")
         select = input()
@@ -253,7 +253,7 @@ def option5():
                     cls()
                     print("Please input a number") # if input isn't number give error
                     input()
-                    option4() # return to bpm menu
+                    option5() # return to pitch menu
             case '2': 
                     __name__ == "__main__" # return to main menu
             case _:
@@ -283,7 +283,7 @@ def brown(output):
 
 def option6():
     global output
-    if 'output' in globals() and isinstance(output, pydub.AudioSegment):
+    if output is not None:
         cls()
         print("Add background noise")
         print("1) White noise")
@@ -327,7 +327,7 @@ def option6():
 def option7():
     global output
     cls()
-    if 'output' in globals() and isinstance(output, pydub.AudioSegment):
+    if output is not None:
         print("1) Mix with an external WAV file")
         print("2) Return to main menu")
         choose = input()
@@ -353,49 +353,38 @@ def option7():
         time.sleep(2) # wait 2 seconds before returning to main menu
         __name__ == "__main__" # return to main menu
 
-def playback():
-    global output
-    play(output) # play music
-
-def playing():
-    playing = True
-    cls()
-    print("Playing ABC file")
-    print("Press any key to stop playback")
-    while playing is True:
-        try:
-            playback()
-        except KeyboardInterrupt: # stop audio if user inputs anything
-            cls()
-            playing = False
-            print("Playback stopped")
-            print("1) Play again")
-            print("2) Return to menu")
-            choice = input()
-            match choice:
-                case '1':
-                    playing() # play audio again
-                case '2':
-                    __name__ == "__main__" # return to main menu
-
 def option8():
     global output
     cls()
-    if 'output' in globals() and isinstance(output, pydub.AudioSegment):
+    if output is not None:
         print("1) Play ABC file")
         print("2) Return to main menu")
         choose = input()
         match choose:
             case '1':
-                playing()
-                input()
+                cls()
+                print("Playing ABC file")
+                print("Press enter to stop playback")
+                play = playback._play_with_simpleaudio(output)
+                input() # stop audio if user presses enter
+                play.stop()
+                cls()
+                print("Playback stopped")
+                print("1) Play again")
+                print("2) Return to menu")
+                choice = input()
+                match choice:
+                    case '1':
+                        option8() # play audio again
+                    case '2':
+                        __name__ == "__main__" # return to main menu
             case '2':
                 __name__ == "__main__" # return to main menu
             case _:
                 cls()
                 print("The input value is not valid. Please try again.")
                 input()
-                option9()
+                option8()
     else:
         print("No file loaded")
         print("Returning to main menu")
@@ -406,7 +395,7 @@ def option8():
 def option9():
     global output
     cls()
-    if 'output' in globals() and isinstance(output, pydub.AudioSegment):
+    if output is not None:
         print("1) Save as WAV file")
         print("2) Return to main menu")
 
